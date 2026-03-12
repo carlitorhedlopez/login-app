@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Authentication App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+:root {
+    --primary-color: #1a9cff;
+    --primary-hover: #088aff;
+    --text-main: #0c142c;
+    --text-muted: #8a94a6;
+    --bg-main: #fcfcfc;
+    --bg-secondary: #f0f4f9;
+    --danger: #e73d3e;
+    --white: #ffffff;
+    --border-color: #e5e8eb;
+    --input-focus: #1a9cff;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    -webkit-font-smoothing: antialiased;
+}
+
+#app {
+    width: 100%;
+    max-width: 480px;
+    min-height: 100vh;
+    background: var(--white);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0,0,0,0.05); /* Soft shadow for desktop view */
+}
+
+.screen {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    padding: 30px;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: var(--bg-main);
+    overflow-y: auto;
+}
+
+.screen.active {
+    display: flex;
+}
+
+.screen.flex-column {
+    justify-content: center;
+}
+
+/* Header & Typography */
+.header-icon {
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+    margin-bottom: 24px;
+}
+
+.icon-box {
+    width: 64px;
+    height: 64px;
+    background-color: var(--bg-secondary);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.title {
+    font-size: 28px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 12px;
+    color: var(--text-main);
+    letter-spacing: -0.5px;
+}
+
+.title.left-align {
+    text-align: left;
+}
+
+.subtitle {
+    font-size: 15px;
+    color: var(--text-muted);
+    text-align: center;
+    margin-bottom: 32px;
+    line-height: 1.5;
+}
+
+.subtitle.left-align {
+    text-align: left;
+}
+
+.top-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 0 24px 0;
+    position: absolute;
+    top: 0;
+    left: 30px;
+    right: 30px;
+    margin-bottom: 16px;
+    z-index: 10;
+}
+
+.back-btn {
+    position: absolute;
+    left: 0;
+    background: none;
+    border: none;
+    color: var(--text-main);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.nav-title {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+/* Forms */
+.auth-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+input {
+    width: 100%;
+    padding: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    font-size: 16px;
+    color: var(--text-main);
+    background-color: var(--white);
+    transition: all 0.2s ease;
+}
+
+input::placeholder {
+    color: #c0c6d4;
+    font-weight: 400;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--input-focus);
+    box-shadow: 0 0 0 3px rgba(26, 156, 255, 0.15);
+}
+
+.password-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 16px;
+    background: none;
+    border: none;
+    color: #aeb5c1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+/* Buttons */
+.btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: var(--white);
+    margin-top: 8px;
+    box-shadow: 0 4px 12px rgba(26, 156, 255, 0.25);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+}
+
+.btn-primary:active {
+    transform: translateY(1px);
+}
+
+.btn-secondary {
+    background-color: var(--bg-secondary);
+    color: var(--primary-color);
+}
+
+.btn-secondary:hover {
+    background-color: #e3ebf3;
+}
+
+.btn-outline-danger {
+    background-color: var(--bg-main);
+    color: var(--danger);
+    border: 1px solid var(--border-color);
+}
+
+.btn-outline-danger:hover {
+    background-color: #fff0f0;
+    border-color: var(--danger);
+}
+
+/* Links & Text */
+.link-right {
+    font-size: 13px;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.primary-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 28px 0;
+    color: #d1d6e0;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.divider span {
+    padding: 0 16px;
+}
+
+.bottom-text {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+/* Utils */
+.center-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-bottom: 40px;
+}
+
+.dashboard-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.dashboard-footer {
+    margin-top: 40px;
+    width: 100%;
+}
+
+.user-greeting {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.error-message {
+    color: var(--danger);
+    font-size: 14px;
+    text-align: center;
+    min-height: 20px;
+    display: none;
+}
+
+.success-message {
+    color: #2e8b57;
+    font-size: 14px;
+    text-align: center;
+    min-height: 20px;
+    display: none;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.screen.active {
+    animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Login Screen -->
+        <main id="login-screen" class="screen active">
+            
+            <h1 class="title">Welcome back!</h1>
+            <p class="subtitle">Sign in to continue your journey</p>
+
+            <form id="login-form" class="auth-form">
+                <div class="input-group">
+                    <label for="login-email">Email Address</label>
+                    <input type="email" id="login-email" placeholder="hello@example.com" required>
+                </div>
+
+                <div class="input-group">
+                    <div class="label-row">
+                        <label for="login-password">Password</label>
+                        <a href="#" id="forgot-password-link" class="link-right">Forgot Password?</a>
+                    </div>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="login-password" placeholder="Enter your password" required>
+                        <button type="button" class="toggle-password" tabindex="-1">
+                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="eye-icon">
+                                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="error-message" id="login-error"></div>
+
+                <button type="submit" class="btn btn-primary" id="login-btn">Log In</button>
+            </form>
+
+            <div class="divider">
+                <span>OR</span>
+            </div>
+
+            <button type="button" class="btn btn-secondary" onclick="app.showScreen('signup-screen')">Create New Account</button>
+        </main>
+
+        <!-- Signup Screen -->
+        <main id="signup-screen" class="screen">
+            <div class="top-nav">
+                <button type="button" class="back-btn" onclick="app.showScreen('login-screen')">
+                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                </button>
+                <span class="nav-title">Create Account</span>
+            </div>
+
+            <h1 class="title left-align">Join us</h1>
+            <p class="subtitle left-align">Enter your details to get started with your new account</p>
+
+            <form id="signup-form" class="auth-form">
+                <div class="input-group">
+                    <label for="signup-name">Full Name</label>
+                    <input type="text" id="signup-name" placeholder="John Doe" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="signup-email">Email Address</label>
+                    <input type="email" id="signup-email" placeholder="example@email.com" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="signup-password">Password</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="signup-password" placeholder="••••••••" required>
+                        <button type="button" class="toggle-password" tabindex="-1">
+                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="eye-icon">
+                                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="error-message" id="signup-error"></div>
+
+                <button type="submit" class="btn btn-primary" id="signup-btn">Create Account</button>
+            </form>
+
+            <p class="bottom-text">Already have an account? <a href="#" onclick="app.showScreen('login-screen')" class="primary-link">Log in</a></p>
+        </main>
+
+        <!-- Email Verification Screen -->
+        <main id="verify-email-screen" class="screen">
+            <div class="top-nav">
+                <button type="button" class="back-btn" onclick="app.showScreen('login-screen')">
+                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                </button>
+                <span class="nav-title">Verification</span>
+            </div>
+
+            <div class="center-content">
+                <h1 class="title">Verify Your Email</h1>
+                <p class="subtitle">We've sent a verification link to your email. Please click it to continue.</p>
+
+                <div class="error-message" id="verify-error"></div>
+                <div class="success-message" id="verify-success"></div>
+
+                <button type="button" class="btn btn-primary" id="verify-btn" onclick="app.checkVerification()">I've verified my email</button>
+                
+                <p class="bottom-text">Didn't receive the email?<br><a href="#" class="primary-link" onclick="app.resendVerification()">Resend Link</a></p>
+            </div>
+        </main>
+
+        <!-- Dashboard (Welcome) Screen -->
+        <main id="dashboard-screen" class="screen flex-column">
+            <div class="dashboard-content">
+                <h1 class="title">Welcome back!</h1>
+                <p class="subtitle">It's good to see you again.</p>
+                <p class="user-greeting" id="user-display-name"></p>
+                
+                <div style="margin-top: 40px;">
+                    <a href="#" onclick="app.showScreen('change-password-screen')" class="primary-link" style="font-weight: 500; font-size: 16px;">Security Settings (Change Password)</a>
+                </div>
+            </div>
+
+            <div class="dashboard-footer">
+                <button type="button" class="btn btn-outline-danger" id="logout-btn" onclick="app.logout()">Log Out</button>
+            </div>
+        </main>
+
+        <!-- Change Password Screen -->
+        <main id="change-password-screen" class="screen">
+            <div class="top-nav">
+                <button type="button" class="back-btn" onclick="app.showScreen('dashboard-screen')">
+                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                </button>
+                <span class="nav-title">Security</span>
+            </div>
+
+            <h1 class="title left-align">Change Password</h1>
+            <p class="subtitle left-align">Please enter your current password and your new choice below.</p>
+
+            <form id="change-password-form" class="auth-form">
+                <div class="input-group">
+                    <label for="current-password">Current Password</label>
+                    <input type="password" id="current-password" placeholder="Enter current password" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="new-password">New Password</label>
+                    <input type="password" id="new-password" placeholder="Enter new password" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="confirm-password">Confirm New Password</label>
+                    <input type="password" id="confirm-password" placeholder="Repeat new password" required>
+                </div>
+
+                <div class="error-message" id="change-pw-error"></div>
+                <div class="success-message" id="change-pw-success"></div>
+
+                <div style="margin-top: 32px;">
+                    <button type="submit" class="btn btn-primary" id="change-pw-btn">Update Password</button>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { 
+    getAuth, 
+    createUserWithEmailAndPassword, 
+    signInWithEmailAndPassword, 
+    signOut, 
+    onAuthStateChanged,
+    sendEmailVerification,
+    updatePassword,
+    EmailAuthProvider,
+    reauthenticateWithCredential
+} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+// TODO: Replace this with your actual Firebase Configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyDZXwKahMGlH86LccQpLgjiufePC9164z8",
+  authDomain: "login-app-bae5c.firebaseapp.com",
+  databaseURL: "https://login-app-bae5c-default-rtdb.firebaseio.com",
+  projectId: "login-app-bae5c",
+  storageBucket: "login-app-bae5c.firebasestorage.app",
+  messagingSenderId: "501991101450",
+  appId: "1:501991101450:web:54b6a96c13acb5d616bbf3",
+  measurementId: "G-4KFFSYLK64"
+};
+
+// Initialize Firebase
+let app, auth;
+try {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+} catch (error) {
+    console.error("Firebase Initialization Error. Please check your config.", error);
+}
+
+// App State & DOM Elements
+const state = {
+    currentUser: null
+};
+
+// Application Controller
+window.app = {
+    // UI Navigation
+    showScreen: (screenId) => {
+        document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+        clearMessages();
+    },
+
+    // Auth Actions
+    logout: async () => {
+        try {
+            await signOut(auth);
+            window.app.showScreen('login-screen');
+        } catch (error) {
+            console.error("Logout Error:", error);
+        }
+    },
+
+    resendVerification: async () => {
+        const btn = document.getElementById('verify-btn');
+        const oldText = btn.textContent;
+        try {
+            btn.textContent = "Sending...";
+            btn.disabled = true;
+            await sendEmailVerification(auth.currentUser);
+            showSuccess('verify-success', 'Verification email sent! Please check your inbox.');
+        } catch (error) {
+            showError('verify-error', getErrorMessage(error));
+        } finally {
+            btn.textContent = oldText;
+            btn.disabled = false;
+        }
+    },
+
+    checkVerification: async () => {
+        if (!auth.currentUser) return;
+        
+        // Force token refresh to get latest emailVerified status
+        await auth.currentUser.reload();
+        
+        if (auth.currentUser.emailVerified) {
+            window.app.showScreen('dashboard-screen');
+            document.getElementById('user-display-name').textContent = auth.currentUser.displayName || auth.currentUser.email;
+        } else {
+            showError('verify-error', 'Email is not verified yet. Please check your inbox.');
+        }
+    }
+};
+
+// Helper: Clear UI Messages
+function clearMessages() {
+    document.querySelectorAll('.error-message, .success-message').forEach(el => {
+        el.textContent = '';
+        el.style.display = 'none';
+    });
+}
+
+// Helper: Show Error
+function showError(elementId, message) {
+    clearMessages();
+    const el = document.getElementById(elementId);
+    if (el) {
+        el.textContent = message;
+        el.style.display = 'block';
+    }
+}
+
+// Helper: Show Success
+function showSuccess(elementId, message) {
+    clearMessages();
+    const el = document.getElementById(elementId);
+    if (el) {
+        el.textContent = message;
+        el.style.display = 'block';
+    }
+}
+
+// Helper: User Friendly Error Messages
+function getErrorMessage(error) {
+    switch (error.code) {
+        case 'auth/email-already-in-use': return 'This email is already registered. Please log in.';
+        case 'auth/invalid-email': return 'Please enter a valid email address.';
+        case 'auth/weak-password': return 'Password should be at least 6 characters.';
+        case 'auth/wrong-password': 
+        case 'auth/invalid-credential': return 'Incorrect email or password.';
+        case 'auth/user-not-found': return 'No account found with this email.';
+        case 'auth/too-many-requests': return 'Too many attempts. Please try again later.';
+        default: return error.message.replace('Firebase: ', '');
+    }
+}
+
+// Initialize Event Listeners
+document.addEventListener('DOMContentLoaded', () => {
+    // Password toggle visibility
+    document.querySelectorAll('.toggle-password').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const input = btn.previousElementSibling;
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            
+            // Toggle generic eye icon appearance
+            const path = btn.querySelector('path');
+            if (isPassword) {
+                path.setAttribute('d', 'M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z M12 9a3 3 0 0 0 0 6 M2 2l20 20'); // Strike through
+            } else {
+                path.setAttribute('d', 'M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z'); // Normal
+            }
+        });
+    });
+
+    // Form Submissions
+    // 1. Login
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!auth) return showError('login-error', 'Firebase is not initialized check config');
+        
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+        const btn = document.getElementById('login-btn');
+        
+        try {
+            btn.disabled = true;
+            btn.textContent = "Logging in...";
+            
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            
+            // Check if verified
+            if (!userCredential.user.emailVerified) {
+                window.app.showScreen('verify-email-screen');
+                return;
+            }
+            
+            document.getElementById('user-display-name').textContent = userCredential.user.displayName || userCredential.user.email;
+            window.app.showScreen('dashboard-screen');
+            e.target.reset();
+        } catch (error) {
+            showError('login-error', getErrorMessage(error));
+        } finally {
+            btn.disabled = false;
+            btn.textContent = "Log In";
+        }
+    });
+
+    // 2. Sign Up
+    document.getElementById('signup-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!auth) return showError('signup-error', 'Firebase is not initialized check config');
+
+        const name = document.getElementById('signup-name').value;
+        const email = document.getElementById('signup-email').value;
+        const password = document.getElementById('signup-password').value;
+        const btn = document.getElementById('signup-btn');
+
+        if (password.length < 6) return showError('signup-error', 'Password must be at least 6 characters');
+
+        try {
+            btn.disabled = true;
+            btn.textContent = "Creating Account...";
+            
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            
+            // Note: Firebase JS SDK doesn't support updating displayName at creation in v10 this easily without updateProfile
+            // But for this simple scope we will proceed.
+            
+            await sendEmailVerification(userCredential.user);
+            window.app.showScreen('verify-email-screen');
+            e.target.reset();
+        } catch (error) {
+            showError('signup-error', getErrorMessage(error));
+        } finally {
+            btn.disabled = false;
+            btn.textContent = "Create Account";
+        }
+    });
+
+    // 3. Change Password
+    document.getElementById('change-password-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const currentPassword = document.getElementById('current-password').value;
+        const newPassword = document.getElementById('new-password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+        const btn = document.getElementById('change-pw-btn');
+
+        if (newPassword !== confirmPassword) {
+            return showError('change-pw-error', 'New passwords do not match');
+        }
+
+        if (newPassword.length < 6) {
+            return showError('change-pw-error', 'New password must be at least 6 characters');
+        }
+
+        try {
+            btn.disabled = true;
+            btn.textContent = "Updating...";
+
+            const user = auth.currentUser;
+            
+            // Must re-authenticate user before changing password
+            const credential = EmailAuthProvider.credential(user.email, currentPassword);
+            await reauthenticateWithCredential(user, credential);
+
+            // Update password
+            await updatePassword(user, newPassword);
+            
+            showSuccess('change-pw-success', 'Password updated successfully!');
+            e.target.reset();
+        } catch (error) {
+            showError('change-pw-error', getErrorMessage(error));
+        } finally {
+            btn.disabled = false;
+            btn.textContent = "Update Password";
+        }
+    });
+
+    // Auth State Listener
+    if (auth) {
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                if (user.emailVerified) {
+                    window.app.showScreen('dashboard-screen');
+                    document.getElementById('user-display-name').textContent = user.displayName || user.email;
+                } else {
+                    window.app.showScreen('verify-email-screen');
+                }
+            } else {
+                window.app.showScreen('login-screen');
+            }
+        });
+    }
+});
+    </script>
+</body>
+</html>
